@@ -1,8 +1,9 @@
 import React from "react";
+import Container from "./Container";
 
 function About() {
   return (
-    <div className="container container--narrow py-md-5">
+    <Container>
       <h2>About Us</h2>
       <p className="lead text-muted">
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis
@@ -24,7 +25,7 @@ function About() {
         nobis provident quo dolorum sapiente temporibus facere non repellendus
         consequatur cupiditate!
       </p>
-    </div>
+    </Container>
   );
 }
 
