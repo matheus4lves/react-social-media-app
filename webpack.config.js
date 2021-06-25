@@ -22,6 +22,7 @@ module.exports = {
         "--private-window",
       ],
     },
+    // tell the server to serve index.html in place of any 404 responses
     historyApiFallback: true,
   },
   module: {
