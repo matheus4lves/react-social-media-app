@@ -1,9 +1,9 @@
 import React from "react";
-import Container from "./Container";
+import Page from "./Page";
 
 function HomeGuest() {
   return (
-    <Container wide={true}>
+    <Page title="Welcome!" wide={true}>
       <div className="row align-items-center">
         <div className="col-lg-7 py-3 py-md-5">
           <h1 className="display-3">Remember Writing?</h1>
@@ -63,7 +63,7 @@ function HomeGuest() {
           </form>
         </div>
       </div>
-    </Container>
+    </Page>
   );
 }
 
