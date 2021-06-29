@@ -11,6 +11,7 @@
 *.sass-cache
 .stylelintcache
 node_modules/
+myComponents/
 .tmp/
 yarn.lock
 .DS_Store
