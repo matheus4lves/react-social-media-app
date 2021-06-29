@@ -13,7 +13,10 @@ function HeaderLoggedOut(props) {
         password,
       });
       if (response.data) {
-        console.log(response.data);
+        // persiste the data in the browser's local storage
+        localStorage.setItem("socialMediaAppToken", response.data.token);
+        localStorage.setItem("socialMediaAppUsername", response.data.username);
+        localStorage.setItem("socialMediaAppAvatar", response.data.avatar);
         props.setLoggedIn(true);
       } else {
         console.log("Incorrect username/password.");
