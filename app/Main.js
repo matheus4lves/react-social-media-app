@@ -13,6 +13,7 @@ import Footer from "./components/Footer";
 import About from "./components/About";
 import Terms from "./components/Terms";
 import CreatePost from "./components/CreatePost";
+import ViewSinglePost from "./components/ViewSinglePost";
 
 function Main() {
   const [loggedIn, setLoggedIn] = useState(
@@ -25,6 +26,11 @@ function Main() {
       <Switch>
         <Route path="/" exact>
           {loggedIn ? <Home /> : <HomeGuest />}
+        </Route>
+        {/* The :id will be replaced by the unique id of the post,
+            for example, ...post/tyojlBalj81jlpzZoU */}
+        <Route path="/post/:id">
+          <ViewSinglePost />
         </Route>
         <Route path="/create-post">
           <CreatePost />
