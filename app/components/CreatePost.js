@@ -15,6 +15,7 @@ function CreatePost(props) {
         body,
         token: localStorage.getItem("socialMediaAppToken"),
       });
+      props.addFlashMessage("Congrats, you successfuly created a post.");
       // Redirect to new post URL
       props.history.push(`/post/${response.data}`);
       console.log("New post was created.");
