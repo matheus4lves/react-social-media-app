@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Page from "./Page";
 import Axios from "axios";
 import { withRouter } from "react-router-dom";
+import ExampleContext from "../ExampleContext";
 
 function CreatePost(props) {
   const [title, setTitle] = useState();
   const [body, setBody] = useState();
+  const { addFlashMessage } = useContext(ExampleContext);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -15,7 +17,7 @@ function CreatePost(props) {
         body,
         token: localStorage.getItem("socialMediaAppToken"),
       });
-      props.addFlashMessage("Congrats, you successfuly created a post.");
+      addFlashMessage("Congrats, you successfuly created a post!");
       // Redirect to new post URL
       props.history.push(`/post/${response.data}`);
       console.log("New post was created.");
