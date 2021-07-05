@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from "react";
+import React, { useState, useReducer, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useImmerReducer } from "use-immer";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
@@ -24,6 +24,12 @@ function Main() {
   const initalState = {
     loggedIn: Boolean(localStorage.getItem("socialMediaAppToken")),
     flashMessages: [],
+    // Centralize local storage manipulation
+    user: {
+      token: localStorage.getItem("socialMediaAppToken"),
+      username: localStorage.getItem("socialMediaAppUsername"),
+      avatar: localStorage.getItem("socialMediaAppAvatar"),
+    },
   };
 
   // When you call dispatch, the type passed refers to the action to be
@@ -32,6 +38,7 @@ function Main() {
     switch (action.type) {
       case "login":
         draft.loggedIn = true;
+        draft.user = action.data;
         // You could've used "break" here, but since you're inside a
         // function, the "return" statement fits well
         return;
@@ -45,6 +52,18 @@ function Main() {
   }
 
   const [state, dispatch] = useImmerReducer(ourReducer, initalState);
+
+  useEffect(() => {
+    if (state.loggedIn) {
+      localStorage.setItem("socialMediaAppToken", state.user.token);
+      localStorage.setItem("socialMediaAppUsername", state.user.username);
+      localStorage.setItem("socialMediaAppAvatar", state.user.avatar);
+    } else {
+      localStorage.removeItem("socialMediaAppToken");
+      localStorage.removeItem("socialMediaAppUsername");
+      localStorage.removeItem("socialMediaAppAvatar");
+    }
+  }, [state.loggedIn]);
 
   return (
     /* Everything inside value will be available for all wrapped 
