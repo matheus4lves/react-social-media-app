@@ -1,5 +1,6 @@
 import React, { useState, useReducer } from "react";
 import ReactDOM from "react-dom";
+import { useImmerReducer } from "use-immer";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import Axios from "axios";
 
@@ -27,21 +28,23 @@ function Main() {
 
   // When you call dispatch, the type passed refers to the action to be
   // executed
-  function ourReducer(state, action) {
+  function ourReducer(draft, action) {
     switch (action.type) {
       case "login":
-        return { loggedIn: true, flashMessages: state.flashMessages };
+        draft.loggedIn = true;
+        // You could've used "break" here, but since you're inside a
+        // function, the "return" statement fits well
+        return;
       case "logout":
-        return { loggedIn: false, flashMessages: state.flashMessages };
+        draft.loggedIn = false;
+        return;
       case "flashMessage":
-        return {
-          loggedIn: state.loggedIn,
-          flashMessages: state.flashMessages.concat(action.value),
-        };
+        draft.flashMessages.push(action.value);
+        return;
     }
   }
 
-  const [state, dispatch] = useReducer(ourReducer, initalState);
+  const [state, dispatch] = useImmerReducer(ourReducer, initalState);
 
   return (
     /* Everything inside value will be available for all wrapped 
