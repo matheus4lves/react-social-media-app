@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Page from "./Page";
 import Axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 function ViewSinglePost() {
   const { id } = useParams();
@@ -51,10 +51,14 @@ function ViewSinglePost() {
       </div>
 
       <p className="text-muted small mb-4">
-        <a href="#">
+        <Link to={`/profile/${post.author.username}`}>
           <img className="avatar-tiny" src={post.author.avatar} />
-        </a>
-        Posted by <a href="#">{post.author.username}</a> on {dateFormatted}
+        </Link>
+        Posted by{" "}
+        <Link to={`/profile/${post.author.username}`}>
+          {post.author.username}
+        </Link>{" "}
+        on {dateFormatted}
       </p>
 
       <div className="body-content">{post.body}</div>
