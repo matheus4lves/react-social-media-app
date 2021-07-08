@@ -10,17 +10,33 @@ function ViewSinglePost() {
   const [post, setPost] = useState();
 
   useEffect(() => {
+    // Identify the axios request
+    const serverRequest = Axios.CancelToken.source();
+
     async function fetchPost() {
       try {
-        const response = await Axios.get(`/post/${id}`);
+        const response = await Axios.get(`/post/${id}`, {
+          cancelToken: serverRequest.token,
+        });
         setPost(response.data);
         setIsLoading(false);
       } catch (e) {
-        console.log(e.responde.data);
+        console.log(e.response.data);
       }
     }
 
     fetchPost();
+
+    // Cleanup function to solve the following memory leak:
+    /*     Warning: Can't perform a React state update on an unmounted 
+    component. This is a no-op, but it indicates a memory leak in your
+    application. To fix, cancel all subscriptions and asynchronous tasks 
+    in a useEffect cleanup function.
+    ViewSinglePost@webpack-internal:///./app/components/
+    ViewSinglePost.js:21:66 */
+    return () => {
+      serverRequest.cancel();
+    };
   }, []);
 
   if (isLoading) {
