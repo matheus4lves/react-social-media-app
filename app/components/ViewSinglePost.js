@@ -3,6 +3,7 @@ import Page from "./Page";
 import Axios from "axios";
 import { useParams, Link } from "react-router-dom";
 import LoadingDotsIcon from "./LoadingDotsIcon";
+import ReactMarkdown from "react-markdown";
 
 function ViewSinglePost() {
   const { id } = useParams();
@@ -78,7 +79,19 @@ function ViewSinglePost() {
         on {dateFormatted}
       </p>
 
-      <div className="body-content">{post.body}</div>
+      <div className="body-content">
+        <ReactMarkdown
+          children={post.body}
+          allowedTypes={[
+            "paragraph",
+            "strong",
+            "emphasis",
+            "text",
+            "list",
+            "listItem",
+          ]}
+        />
+      </div>
     </Page>
   );
 }
