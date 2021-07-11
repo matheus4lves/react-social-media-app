@@ -32,7 +32,7 @@ function CreatePost(props) {
   }
 
   return (
-    <Page>
+    <Page title="Create New Post">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="post-title" className="text-muted mb-1">

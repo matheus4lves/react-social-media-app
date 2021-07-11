@@ -20,6 +20,7 @@ import CreatePost from "./components/CreatePost";
 import ViewSinglePost from "./components/ViewSinglePost";
 import FlashMessages from "./components/FlashMessages";
 import Profile from "./components/Profile";
+import EditPost from "./components/EditPost";
 
 function Main() {
   const initalState = {
@@ -35,7 +36,7 @@ function Main() {
 
   // When you call dispatch, the type passed refers to the action to be
   // executed
-  function ourReducer(draft, action) {
+  function reducer(draft, action) {
     switch (action.type) {
       case "login":
         draft.loggedIn = true;
@@ -52,7 +53,7 @@ function Main() {
     }
   }
 
-  const [state, dispatch] = useImmerReducer(ourReducer, initalState);
+  const [state, dispatch] = useImmerReducer(reducer, initalState);
 
   useEffect(() => {
     if (state.loggedIn) {
@@ -84,8 +85,11 @@ function Main() {
             </Route>
             {/* The :id will be replaced by the unique id of the post,
             for example, ...post/tyojlBalj81jlpzZoU */}
-            <Route path="/post/:id">
+            <Route path="/post/:id" exact>
               <ViewSinglePost />
+            </Route>
+            <Route path="/post/:id/edit" exact>
+              <EditPost />
             </Route>
             <Route path="/create-post">
               <CreatePost />
