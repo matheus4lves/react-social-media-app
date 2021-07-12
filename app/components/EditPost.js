@@ -1,11 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import Page from "./Page";
 import Axios from "axios";
 import { useParams, Link } from "react-router-dom";
 import LoadingDotsIcon from "./LoadingDotsIcon";
 import { useImmerReducer } from "use-immer";
+import StateContext from "../StateContext";
+import DispatchContext from "../DispatchContext";
 
 function EditPost() {
+  const appState = useContext(StateContext);
+  const appDispatch = useContext(DispatchContext);
+
   const initialState = {
     title: {
       value: "",
@@ -31,11 +36,32 @@ function EditPost() {
         draft.body.value = action.value.body;
         draft.isFetching = false;
         return;
+      case "titleChanged":
+        draft.title.value = action.value;
+        return;
+      case "bodyChanged":
+        draft.body.value = action.value;
+        return;
+      case "requestSubmitted":
+        draft.sendCount++;
+        return;
+      case "saveRequestStarted":
+        draft.isSaving = true;
+        return;
+      case "saveRequestFinished":
+        draft.isSaving = false;
+        return;
     }
   }
 
   const [state, dispatch] = useImmerReducer(reducer, initialState);
 
+  function handleSubmit(e) {
+    e.preventDefault();
+    dispatch({ type: "requestSubmitted" });
+  }
+
+  // Get the post you want to update
   useEffect(() => {
     // Identify the axios request
     const serverRequest = Axios.CancelToken.source();
@@ -67,6 +93,41 @@ function EditPost() {
     };
   }, []);
 
+  // useEffect is the proprer location to send a request
+  // Update the post
+  useEffect(() => {
+    if (state.sendCount) {
+      dispatch({ type: "saveRequestStarted" });
+
+      const serverRequest = Axios.CancelToken.source();
+
+      async function updatePost() {
+        try {
+          const response = await Axios.post(
+            `/post/${state.id}/edit`,
+            {
+              title: state.title.value,
+              body: state.body.value,
+              token: appState.user.token,
+            },
+            {
+              cancelToken: serverRequest.token,
+            }
+          );
+          dispatch({ type: "saveRequestFinished" });
+          appDispatch({ type: "flashMessage", value: "Post updated!" });
+        } catch (e) {
+          console.log(e.response.data);
+        }
+      }
+
+      updatePost();
+      return () => {
+        serverRequest.cancel();
+      };
+    }
+  }, [state.sendCount]);
+
   if (state.isFetching) {
     return (
       <Page title="...">
@@ -77,12 +138,15 @@ function EditPost() {
 
   return (
     <Page title="Edit Post">
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="post-title" className="text-muted mb-1">
             <small>Title</small>
           </label>
           <input
+            onChange={(e) =>
+              dispatch({ type: "titleChanged", value: e.target.value })
+            }
             autoFocus
             name="title"
             id="post-title"
@@ -99,6 +163,9 @@ function EditPost() {
             <small>Body Content</small>
           </label>
           <textarea
+            onChange={(e) =>
+              dispatch({ type: "bodyChanged", value: e.target.value })
+            }
             name="body"
             id="post-body"
             value={state.body.value}
@@ -107,7 +174,9 @@ function EditPost() {
           />
         </div>
 
-        <button className="btn btn-primary">Save Updates</button>
+        <button className="btn btn-primary" disabled={state.isSaving}>
+          Save Updates
+        </button>
       </form>
     </Page>
   );
