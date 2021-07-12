@@ -37,19 +37,33 @@ function EditPost() {
         draft.isFetching = false;
         return;
       case "titleChanged":
+        draft.title.hasErros = false;
         draft.title.value = action.value;
         return;
       case "bodyChanged":
+        draft.body.hasErros = false;
         draft.body.value = action.value;
         return;
       case "requestSubmitted":
-        draft.sendCount++;
+        if (!draft.title.hasErros && !draft.body.hasErros) draft.sendCount++;
         return;
       case "saveRequestStarted":
         draft.isSaving = true;
         return;
       case "saveRequestFinished":
         draft.isSaving = false;
+        return;
+      case "titleRuleViolated":
+        if (!action.value.trim()) {
+          draft.title.hasErros = true;
+          draft.title.errorMessage = "You must provide a title!";
+        }
+        return;
+      case "bodyRuleViolated":
+        if (!action.value.trim()) {
+          draft.body.hasErros = true;
+          draft.body.errorMessage = "You must provide body content!";
+        }
         return;
     }
   }
@@ -58,6 +72,10 @@ function EditPost() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    // check for error before a request occurs
+    dispatch({ type: "titleRuleViolated", value: state.title.value });
+    dispatch({ type: "bodyRuleViolated", value: state.body.value });
+
     dispatch({ type: "requestSubmitted" });
   }
 
@@ -147,6 +165,9 @@ function EditPost() {
             onChange={(e) =>
               dispatch({ type: "titleChanged", value: e.target.value })
             }
+            onBlur={(e) =>
+              dispatch({ type: "titleRuleViolated", value: e.target.value })
+            }
             autoFocus
             name="title"
             id="post-title"
@@ -156,6 +177,12 @@ function EditPost() {
             placeholder=""
             autoComplete="off"
           />
+          {/* https://reactjs.org/docs/conditional-rendering.html#inline-if-with-logical--operator */}
+          {state.title.hasErros && (
+            <div className="alert alert-danger small liveValidateMessage">
+              {state.title.errorMessage}
+            </div>
+          )}
         </div>
 
         <div className="form-group">
@@ -166,12 +193,20 @@ function EditPost() {
             onChange={(e) =>
               dispatch({ type: "bodyChanged", value: e.target.value })
             }
+            onBlur={(e) =>
+              dispatch({ type: "bodyRuleViolated", value: e.target.value })
+            }
             name="body"
             id="post-body"
             value={state.body.value}
             className="body-content tall-textarea form-control"
             type="text"
           />
+          {state.body.hasErros && (
+            <div className="alert alert-danger small liveValidateMessage">
+              {state.body.errorMessage}
+            </div>
+          )}
         </div>
 
         <button className="btn btn-primary" disabled={state.isSaving}>
