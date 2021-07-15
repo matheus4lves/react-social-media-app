@@ -1,14 +1,14 @@
 import React, { useContext, useEffect } from "react";
 import Page from "./Page";
 import Axios from "axios";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, withRouter } from "react-router-dom";
 import LoadingDotsIcon from "./LoadingDotsIcon";
 import { useImmerReducer } from "use-immer";
 import StateContext from "../StateContext";
 import DispatchContext from "../DispatchContext";
 import NotFound from "./NotFound";
 
-function EditPost() {
+function EditPost(props) {
   const appState = useContext(StateContext);
   const appDispatch = useContext(DispatchContext);
 
@@ -94,10 +94,17 @@ function EditPost() {
         const response = await Axios.get(`/post/${state.id}`, {
           cancelToken: serverRequest.token,
         });
-        // the value will be used by the fetchCompleted case inside the
-        // switch
         if (response.data) {
+          // the value will be used by the fetchCompleted case inside the
+          // switch
           dispatch({ type: "fetchCompleted", value: response.data });
+          if (appState.user.username != response.data.author.username) {
+            appDispatch({
+              type: "flashMessage",
+              value: "You do not have permission to edit this post!",
+            });
+            props.history.push("/");
+          }
         } else {
           dispatch({ type: "notFound" });
         }
@@ -233,4 +240,4 @@ function EditPost() {
   );
 }
 
-export default EditPost;
+export default withRouter(EditPost);
