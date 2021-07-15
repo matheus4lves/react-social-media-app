@@ -1,18 +1,20 @@
 import React, { useContext, useEffect, useState } from "react";
 import Page from "./Page";
 import Axios from "axios";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, withRouter } from "react-router-dom";
 import LoadingDotsIcon from "./LoadingDotsIcon";
 import ReactMarkdown from "react-markdown";
 import ReactTooltip from "react-tooltip";
 import NotFound from "./NotFound";
 import StateContext from "../StateContext";
+import DispatchContext from "../DispatchContext";
 
-function ViewSinglePost() {
+function ViewSinglePost(props) {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [post, setPost] = useState();
   const appState = useContext(StateContext);
+  const appDispatch = useContext(DispatchContext);
 
   useEffect(() => {
     // Identify the axios request
@@ -70,6 +72,29 @@ function ViewSinglePost() {
     }
   }
 
+  async function handleDelete() {
+    const areYouSure = window.confirm(
+      "Do you really want to delete this post?"
+    );
+    if (areYouSure) {
+      try {
+        const response = await Axios.delete(`/post/${id}`, {
+          data: { token: appState.user.token },
+        });
+        // The back-end was set up to answer with "Success" if you have
+        // permission to delete the post and if it was successfully deleted
+        if (response.data == "Success") {
+          appDispatch({
+            type: "flashMessage",
+            value: "The post was successfully deleted.",
+          });
+          props.history.push(`/profile/${appState.user.username}`);
+        }
+      } catch (e) {
+        console.log(e.response.data);
+      }
+    }
+  }
   return (
     <Page title={post.title}>
       <div className="d-flex justify-content-between">
@@ -86,6 +111,7 @@ function ViewSinglePost() {
             </Link>
             <ReactTooltip id="edit" className="custom-tooltip" />{" "}
             <a
+              onClick={handleDelete}
               data-tip="Delete"
               data-for="delete"
               className="delete-post-button text-danger"
@@ -125,4 +151,4 @@ function ViewSinglePost() {
   );
 }
 
-export default ViewSinglePost;
+export default withRouter(ViewSinglePost);
