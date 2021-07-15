@@ -5,6 +5,7 @@ import { useParams, Link } from "react-router-dom";
 import LoadingDotsIcon from "./LoadingDotsIcon";
 import ReactMarkdown from "react-markdown";
 import ReactTooltip from "react-tooltip";
+import NotFound from "./NotFound";
 
 function ViewSinglePost() {
   const { id } = useParams();
@@ -40,6 +41,10 @@ function ViewSinglePost() {
       serverRequest.cancel();
     };
   }, []);
+
+  if (!isLoading && !post) {
+    return <NotFound />;
+  }
 
   if (isLoading) {
     return (

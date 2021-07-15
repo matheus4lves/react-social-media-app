@@ -6,6 +6,7 @@ import LoadingDotsIcon from "./LoadingDotsIcon";
 import { useImmerReducer } from "use-immer";
 import StateContext from "../StateContext";
 import DispatchContext from "../DispatchContext";
+import NotFound from "./NotFound";
 
 function EditPost() {
   const appState = useContext(StateContext);
@@ -26,6 +27,7 @@ function EditPost() {
     isSaving: false,
     id: useParams().id,
     sendCount: 0,
+    notFound: false,
   };
 
   // Remember that draft is a "copy" of the initialState
@@ -65,6 +67,9 @@ function EditPost() {
           draft.body.errorMessage = "You must provide body content!";
         }
         return;
+      case "notFound":
+        draft.notFound = true;
+        return;
     }
   }
 
@@ -91,7 +96,11 @@ function EditPost() {
         });
         // the value will be used by the fetchCompleted case inside the
         // switch
-        dispatch({ type: "fetchCompleted", value: response.data });
+        if (response.data) {
+          dispatch({ type: "fetchCompleted", value: response.data });
+        } else {
+          dispatch({ type: "notFound" });
+        }
       } catch (e) {
         console.log(e.response.data);
       }
@@ -145,6 +154,10 @@ function EditPost() {
       };
     }
   }, [state.sendCount]);
+
+  if (state.notFound) {
+    return <NotFound />;
+  }
 
   if (state.isFetching) {
     return (
