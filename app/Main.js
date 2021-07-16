@@ -22,9 +22,10 @@ import FlashMessages from "./components/FlashMessages";
 import Profile from "./components/Profile";
 import EditPost from "./components/EditPost";
 import NotFound from "./components/NotFound";
+import Search from "./components/Search";
 
 function Main() {
-  const initalState = {
+  const initialState = {
     loggedIn: Boolean(localStorage.getItem("socialMediaAppToken")),
     flashMessages: [],
     // Centralize local storage manipulation
@@ -33,6 +34,7 @@ function Main() {
       username: localStorage.getItem("socialMediaAppUsername"),
       avatar: localStorage.getItem("socialMediaAppAvatar"),
     },
+    isSearchOpen: false,
   };
 
   // When you call dispatch, the type passed refers to the action to be
@@ -51,10 +53,16 @@ function Main() {
       case "flashMessage":
         draft.flashMessages.push(action.value);
         return;
+      case "searchOpened":
+        draft.isSearchOpen = true;
+        return;
+      case "searchClosed":
+        draft.isSearchOpen = false;
+        return;
     }
   }
 
-  const [state, dispatch] = useImmerReducer(reducer, initalState);
+  const [state, dispatch] = useImmerReducer(reducer, initialState);
 
   useEffect(() => {
     if (state.loggedIn) {
@@ -105,6 +113,7 @@ function Main() {
               <NotFound />
             </Route>
           </Switch>
+          {state.isSearchOpen ? <Search /> : ""}
           <Footer />
         </BrowserRouter>
       </DispatchContext.Provider>
