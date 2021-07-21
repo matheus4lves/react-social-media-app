@@ -3,7 +3,7 @@ import Axios from "axios";
 import { useParams, Link } from "react-router-dom";
 import LoadingDotsIcon from "./LoadingDotsIcon";
 
-function ProfileFollowers() {
+function ProfilePeople(props) {
   const [isLoading, setIsLoading] = useState(true);
   // The initial state is an empty array because the server will send
   // an array with posts
@@ -15,7 +15,7 @@ function ProfileFollowers() {
 
     async function fetchPosts() {
       try {
-        const response = await Axios.get(`/profile/${username}/followers`, {
+        const response = await Axios.get(`/profile/${username}/${props.type}`, {
           cancelToken: serverRequest.token,
         });
         setPosts(response.data);
@@ -31,7 +31,7 @@ function ProfileFollowers() {
     return () => {
       serverRequest.cancel();
     };
-  }, [username]);
+  }, [props.type]);
 
   if (isLoading) return <LoadingDotsIcon />;
 
@@ -53,4 +53,4 @@ function ProfileFollowers() {
   );
 }
 
-export default ProfileFollowers;
+export default ProfilePeople;
