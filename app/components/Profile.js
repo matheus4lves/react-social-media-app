@@ -1,19 +1,25 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useContext } from "react";
 import Page from "./Page";
 import { useParams } from "react-router-dom";
 import Axios from "axios";
 import StateContext from "../StateContext";
 import ProfilePosts from "./ProfilePosts";
+import { useImmer } from "use-immer";
 
 function Profile() {
   // useParams returns an object with url variables, like :username
   const { username } = useParams();
   const appState = useContext(StateContext);
-  const [profileData, setProfileData] = useState({
-    profileUsername: "...",
-    profileAvatar: "https://gravatar.com/avatar/placeholder?s=128",
-    isFollowing: false,
-    counts: { postCount: "", followerCount: "", followingCount: "" },
+  const [state, setState] = useImmer({
+    followActionLoading: false,
+    startFollowingRequestCount: 0,
+    stopFollowingRequestCount: 0,
+    profileData: {
+      profileUsername: "...",
+      profileAvatar: "https://gravatar.com/avatar/placeholder?s=128",
+      isFollowing: false,
+      counts: { postCount: "", followerCount: "", followingCount: "" },
+    },
   });
 
   useEffect(() => {
@@ -29,7 +35,9 @@ function Profile() {
           },
           { cancelToken: serverRequest.token }
         );
-        setProfileData(response.data);
+        setState((draft) => {
+          draft.profileData = response.data;
+        });
       } catch (e) {
         console.log(e.response.data);
       }
@@ -42,25 +50,75 @@ function Profile() {
     };
   }, []);
 
+  function startFollowing() {
+    setState((draft) => {
+      draft.startFollowingRequestCount++;
+    });
+  }
+
+  useEffect(() => {
+    if (state.startFollowingRequestCount) {
+      setState((draft) => {
+        draft.followActionLoading = true;
+      });
+
+      const serverRequest = Axios.CancelToken.source();
+
+      async function fetchData() {
+        try {
+          const response = await Axios.post(
+            `/addFollow/${state.profileData.profileUsername}`,
+            {
+              token: appState.user.token,
+            },
+            { cancelToken: serverRequest.token }
+          );
+          setState((draft) => {
+            draft.profileData.isFollowing = true;
+            draft.profileData.counts.followerCount++;
+            draft.followActionLoading = false;
+          });
+        } catch (e) {
+          console.log(e.response.data);
+        }
+      }
+
+      fetchData();
+
+      return () => {
+        serverRequest.cancel();
+      };
+    }
+  }, [state.startFollowingRequestCount]);
+
   return (
     <Page title="Profile Screen">
       <h2>
-        <img className="avatar-small" src={profileData.profileAvatar} />
-        {profileData.profileUsername}
-        <button className="btn btn-primary btn-sm ml-2">
-          Follow <i className="fas fa-user-plus"></i>
-        </button>
+        <img className="avatar-small" src={state.profileData.profileAvatar} />
+        {state.profileData.profileUsername}
+        {appState.loggedIn &&
+          !state.profileData.isFollowing &&
+          appState.user.username != state.profileData.profileUsername &&
+          state.profileData.profileUsername != "..." && (
+            <button
+              onClick={startFollowing}
+              disabled={state.followActionLoading}
+              className="btn btn-primary btn-sm ml-2"
+            >
+              Follow <i className="fas fa-user-plus"></i>
+            </button>
+          )}
       </h2>
 
       <div className="profile-nav nav nav-tabs pt-2 mb-4">
         <a href="#" className="active nav-item nav-link">
-          Posts: {profileData.counts.postCount}
+          Posts: {state.profileData.counts.postCount}
         </a>
         <a href="#" className="nav-item nav-link">
-          Followers: {profileData.counts.followerCount}
+          Followers: {state.profileData.counts.followerCount}
         </a>
         <a href="#" className="nav-item nav-link">
-          Following: {profileData.counts.followingCount}
+          Following: {state.profileData.counts.followingCount}
         </a>
       </div>
 
