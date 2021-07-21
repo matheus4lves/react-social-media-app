@@ -31,7 +31,7 @@ function ProfilePosts() {
     return () => {
       serverRequest.cancel();
     };
-  }, []);
+  }, [username]);
 
   if (isLoading) return <LoadingDotsIcon />;
 

@@ -48,7 +48,7 @@ function Profile() {
     return () => {
       serverRequest.cancel();
     };
-  }, []);
+  }, [username]);
 
   function startFollowing() {
     setState((draft) => {
