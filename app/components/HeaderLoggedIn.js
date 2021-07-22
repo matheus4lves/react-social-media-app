@@ -30,6 +30,7 @@ function HeaderLoggedIn(props) {
       </a>{" "}
       <ReactTooltip place="bottom" id="search" className="custom-tooltip" />
       <span
+        onClick={() => appDispatch({ type: "chatToggled" })}
         data-for="chat"
         data-tip="Chat"
         className="mr-2 header-chat-icon text-white"

@@ -24,6 +24,7 @@ import Profile from "./components/Profile";
 import EditPost from "./components/EditPost";
 import NotFound from "./components/NotFound";
 import Search from "./components/Search";
+import Chat from "./components/Chat";
 
 function Main() {
   const initialState = {
@@ -36,6 +37,7 @@ function Main() {
       avatar: localStorage.getItem("socialMediaAppAvatar"),
     },
     isSearchOpen: false,
+    isChatOpen: false,
   };
 
   // When you call dispatch, the type passed refers to the action to be
@@ -59,6 +61,12 @@ function Main() {
         return;
       case "searchClosed":
         draft.isSearchOpen = false;
+        return;
+      case "chatToggled":
+        draft.isChatOpen = !draft.isChatOpen;
+        return;
+      case "chatClosed":
+        draft.isChatOpen = false;
         return;
     }
   }
@@ -122,6 +130,7 @@ function Main() {
           >
             <Search />
           </CSSTransition>
+          <Chat />
           <Footer />
         </BrowserRouter>
       </DispatchContext.Provider>
