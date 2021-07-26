@@ -22,6 +22,7 @@ function Chat() {
   useEffect(() => {
     if (appState.isChatOpen) {
       chatField.current.focus();
+      appDispatch({ type: "unreadMessagesCountReseted" });
     }
   }, [appState.isChatOpen]);
 
@@ -35,6 +36,9 @@ function Chat() {
 
   useEffect(() => {
     chatLog.current.scrollTop = chatLog.current.scrollHeight;
+    if (state.chatMessages.length && !appState.isChatOpen) {
+      appDispatch({ type: "unreadMessagesCountIncremented" });
+    }
   }, [state.chatMessages]);
 
   function handleSubmit(e) {

@@ -38,6 +38,7 @@ function Main() {
     },
     isSearchOpen: false,
     isChatOpen: false,
+    unreadMessagesCount: 0,
   };
 
   // When you call dispatch, the type passed refers to the action to be
@@ -67,6 +68,12 @@ function Main() {
         return;
       case "chatClosed":
         draft.isChatOpen = false;
+        return;
+      case "unreadMessagesCountIncremented":
+        draft.unreadMessagesCount++;
+        return;
+      case "unreadMessagesCountReseted":
+        draft.unreadMessagesCount = 0;
         return;
     }
   }
