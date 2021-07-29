@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import Page from "./Page";
 import { useImmerReducer } from "use-immer";
 import { CSSTransition } from "react-transition-group";
 import Axios from "axios";
+import DispatchContext from "../DispatchContext";
 
 function HomeGuest() {
+  const appDispatch = useContext(DispatchContext);
+
   const initialState = {
     username: {
       value: "",
@@ -55,7 +58,7 @@ function HomeGuest() {
             invalid username it will not be in the database, so we
             don't even have to bother about checking it) */
         }
-        if (!draft.username.hasErros) {
+        if (!draft.username.hasErros && !action.noRequest) {
           draft.username.checkCount++;
         }
         return;
@@ -77,7 +80,7 @@ function HomeGuest() {
           draft.email.hasErros = true;
           draft.email.message = "You must provide a valid email address.";
         }
-        if (!draft.email.hasErros) {
+        if (!draft.email.hasErros && !action.noRequest) {
           draft.email.checkCount++;
         }
         return;
@@ -105,6 +108,15 @@ function HomeGuest() {
         }
         return;
       case "submitForm":
+        if (
+          !draft.username.hasErros &&
+          draft.username.isUnique &&
+          !draft.email.hasErros &&
+          draft.email.isUnique &&
+          !draft.password.hasErros
+        ) {
+          draft.submitCount++;
+        }
         return;
     }
   }
@@ -184,8 +196,52 @@ function HomeGuest() {
     }
   }, [state.email.checkCount]);
 
+  useEffect(() => {
+    if (state.submitCount) {
+      const serverRequest = Axios.CancelToken.source();
+      async function fetchResults() {
+        try {
+          const response = await Axios.post(
+            "/register",
+            {
+              username: state.username.value,
+              email: state.email.value,
+              password: state.password.value,
+            },
+            { cancelToken: serverRequest.token }
+          );
+
+          appDispatch({ type: "login", data: response.data });
+          appDispatch({
+            type: "flashMessage",
+            value: "Congrats! Welcome to your new account.",
+          });
+        } catch (e) {
+          console.log(e.response.data);
+        }
+      }
+      fetchResults();
+      return () => serverRequest.cancel();
+    }
+  }, [state.submitCount]);
+
   function handleSubmit(e) {
     e.preventDefault();
+    dispatch({ type: "usernameImmediately", value: state.username.value });
+    dispatch({
+      type: "usernameAfterDelay",
+      value: state.username.value,
+      noRequest: true,
+    });
+    dispatch({ type: "emailImmediately", value: state.email.value });
+    dispatch({
+      type: "emailAfterDelay",
+      value: state.email.value,
+      noRequest: true,
+    });
+    dispatch({ type: "passwordImmediately", value: state.password.value });
+    dispatch({ type: "passwordAfterDelay", value: state.password.value });
+    dispatch({ type: "submitForm" });
   }
 
   return (
