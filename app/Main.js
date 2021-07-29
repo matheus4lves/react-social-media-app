@@ -92,6 +92,35 @@ function Main() {
     }
   }, [state.loggedIn]);
 
+  // Check if the token has expired or not on first render
+  useEffect(() => {
+    // We only check the token if the user has one
+    if (state.loggedIn) {
+      const serverRequest = Axios.CancelToken.source();
+      async function fetchResults() {
+        try {
+          const response = await Axios.post(
+            "/checkToken",
+            { token: state.user.token },
+            { cancelToken: serverRequest.token }
+          );
+          if (!response.data) {
+            dispatch({ type: "logout" });
+            dispatch({
+              type: "flashMessage",
+              value: "You have to login again.",
+            });
+          }
+        } catch (e) {
+          console.log(e.response.data);
+        }
+      }
+
+      fetchResults();
+      return () => serverRequest.cancel();
+    }
+  }, []);
+
   return (
     /* Everything inside value will be available for all wrapped 
     components */
