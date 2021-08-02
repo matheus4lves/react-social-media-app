@@ -12,6 +12,7 @@
 .stylelintcache
 node_modules/
 myComponents/
+dist/
 .tmp/
 yarn.lock
 .DS_Store

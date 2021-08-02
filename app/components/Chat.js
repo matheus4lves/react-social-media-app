@@ -26,7 +26,10 @@ function Chat() {
   useEffect(() => {
     // Doubts? Read the official documentation
     // https://socket.io/docs/v4/client-initialization/
-    socket.current = io("http://localhost:8080");
+    socket.current = io(
+      process.env.BACKENDURL ||
+        "https://social-media-app-back-end.herokuapp.com"
+    );
 
     socket.current.on("chatFromServer", (message) => {
       setState((draft) => {
